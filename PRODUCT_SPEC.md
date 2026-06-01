@@ -338,6 +338,118 @@ Farmer access is always free. Revenue comes from the data layer institutions nee
 
 ---
 
+
+## AI Integration
+
+Three AI layers that add real value on top of the graph, not decoration.
+
+### 1. Natural Language Seed Search (MVP — Hackathon)
+
+**Problem:** Farmers don't think in dropdowns. They think in problems.
+
+**How it works:**
+- Farmer types or says: "I have 2 acres in Kitui, sandy soil, need something that survives dry seasons and matures fast"
+- LLM extracts structured intent: `{crop: null, traits: [drought_resistant, short_season], soil: sandy, county: Kitui}`
+- Backend converts to Cypher query, graph returns results
+
+**LLM Prompt Pattern:**
+```
+You are a seed search assistant for Kenyan farmers.
+Extract search parameters from the farmer's message.
+Return JSON only: {crop, traits[], soil, climate, county, radius_km}
+Use null for anything not mentioned.
+
+Valid traits: drought_resistant, short_season, pest_resistant, high_yield, low_input
+Valid soils: acidic, sandy, loamy, clay, volcanic
+Valid climates: arid, semi_arid, sub_humid, humid, highland
+Valid counties: Machakos, Kitui, Makueni, Tharaka-Nithi, Meru, Embu
+
+Farmer's message: "{input}"
+```
+
+**Channels:** Web search bar, WhatsApp text, WhatsApp voice (Whisper transcription then LLM), USSD "describe what you need" option.
+
+**Provider:** Featherless API (Llama 3 or Mistral for fast structured extraction).
+
+---
+
+### 2. Seed Recommendation with Reasoning (MVP — Hackathon)
+
+**Problem:** Raw search results (variety name, farmer name, location) don't build enough confidence to act. Farmers need to understand WHY this seed fits their situation.
+
+**How it works:**
+- Graph returns matching seeds with context (grower count, avg success rating, years grown, distance, soil/climate match)
+- LLM synthesizes into natural language recommendation
+
+**LLM Prompt Pattern:**
+```
+You are an agricultural advisor helping a Kenyan smallholder farmer choose seeds.
+Based on the search results below, explain why each variety is a good match.
+Be specific: mention distance, years grown, success ratings, and relevant conditions.
+Write in simple English (or Swahili if requested). 2-3 sentences per variety.
+
+Farmer's conditions: {soil}, {climate}, {county}, {farm_size} acres
+Search results: {graph_results_json}
+```
+
+**Output example:**
+"Katumani Millet has been grown within 15km of your farm by 7 farmers since 1992. It performs best in sandy, acidic soils like yours. Your neighbor Mutua Mwangi reports a 4.8/5 success rating over 12 years. It matures in 75 days, fitting your short rain season window."
+
+---
+
+### 3. Provenance Storytelling (Post-Hackathon)
+
+**Problem:** A provenance graph (A then B then C then D over 30 years) is meaningful data but doesn't create the emotional trust that makes a farmer commit.
+
+**How it works:**
+- Graph returns the full provenance chain with dates, locations, and growing conditions
+- LLM generates a narrative about the seed's journey and survival
+
+**Output example:**
+"This Gadam Sorghum has been cultivated in the Machakos-Kitui corridor for 38 years. It started at a community seed bank in Tseikuru, passed through 5 farmers across 3 sub-counties, and survived 4 recorded drought events. Farmers who grow it consistently rate it 4.5+ for drought tolerance."
+
+**Why this works:** Story creates trust. "This seed survived the 2017 drought" is more persuasive than a number.
+
+---
+
+### 4. Variety Gap Detection (Post-Hackathon)
+
+**Problem:** Institutions want to know where indigenous seed coverage is thin so they can intervene.
+
+**How it works:**
+- Graph identifies zones where farmers search for seeds but no growers exist nearby
+- LLM generates human-readable gap reports for county agriculture officers
+
+**Output example:**
+"Makueni South has 34 searches for drought-tolerant millet in the last 90 days but zero registered growers. Nearest sources are in Kitui (47km). Recommend: seed champion placement or seed bank distribution event."
+
+---
+
+### 5. Swahili/Kikamba Voice Interface (Phase 2)
+
+**Problem:** Many target farmers are older, low-literacy, and speak Kikamba or Kiswahili as primary language.
+
+**How it works:**
+- Farmer calls a number or sends WhatsApp voice note in Kikamba/Swahili
+- Whisper transcribes, LLM translates and extracts intent, graph query runs, LLM generates response in same language
+- Response sent as text SMS or synthesized voice
+
+**Provider:** Whisper for transcription, Featherless for reasoning, TTS API for voice response.
+
+---
+
+### AI Roadmap
+
+| Layer | Phase | Bounty |
+|-------|-------|--------|
+| Natural Language Search | Hackathon MVP | Featherless |
+| Recommendation Reasoning | Hackathon MVP | Featherless |
+| Provenance Storytelling | Post-hackathon | Featherless |
+| Variety Gap Detection | Phase 2 | Featherless |
+| Swahili/Kikamba Voice | Phase 2 | Featherless + Whisper |
+
+---
+
 ## Risks
 
 | Risk | Likelihood | Mitigation |
@@ -350,6 +462,107 @@ Farmer access is always free. Revenue comes from the data layer institutions nee
 | USSD costs unsustainable | Medium | Institutional revenue covers operational costs. Explore USSD sponsorship from agricultural input companies. |
 
 ---
+
+
+## Differentiation: What Makes Judges Remember This
+
+### The Demo Moment: Animated Seed Spread
+
+A full-screen animated visualization showing how a single seed variety spread across Kenya over 40 years. Year by year, nodes light up as farmers receive the seed. Edges draw between them. Like watching a network grow in fast-forward.
+
+One animation communicates the entire value proposition faster than any pitch slide. Build it using the provenance chain data already in Neo4j, rendered as a time-lapse force graph.
+
+### Graph-Only Insights (Things No Other Tool Can Produce)
+
+**Variety Extinction Risk:**
+```cypher
+MATCH (s:SeedVariety)<-[g:GROWS]-(f:Farmer)
+WITH s, count(f) AS growers, avg(2026 - g.since_year) AS avg_age
+WHERE growers <= 3 AND avg_age > 20
+RETURN s.local_name, growers, avg_age
+```
+> "Tseikuru Sorghum is grown by only 3 farmers, all growing it for 25+ years. None have shared in 5 years. This variety is at risk of disappearing."
+
+**Network Vulnerability (Single Point of Failure):**
+```cypher
+MATCH (f:Farmer)-[:SHARED_WITH*]->(recipients)
+WITH f, count(DISTINCT recipients) AS downstream_farmers
+ORDER BY downstream_farmers DESC LIMIT 5
+RETURN f.name, downstream_farmers
+```
+> "78% of drought-resistant millet in Kitui traces back to a single farmer. If that node disappears, the whole sub-county loses access."
+
+**Hidden Seed Corridors:**
+```cypher
+MATCH path = (a:Farmer)-[:SHARED_WITH*3..]->(b:Farmer)
+WHERE a.county <> b.county
+RETURN DISTINCT a.county, b.county, count(path) AS exchanges
+```
+> "Discovered: an active seed corridor between Kitui and Tharaka-Nithi that moves 12 varieties annually through 5 intermediary farmers."
+
+These analyses are impossible without a graph database. They justify Neo4j as core infrastructure, not decoration.
+
+### Impact Calculation
+
+One number that makes judges lean forward:
+
+> "If every farmer in Machakos currently buying commercial seed at KES 350/kg switched to matched indigenous varieties available within 20km for free, they'd save KES 14.2M per season in input costs while maintaining 87% of yield based on success ratings in the graph."
+
+Calculated from: (farmers in county) × (avg seed purchase) × (% with graph-matched alternative available). Synthetic data, real methodology.
+
+### The Story Arc (Pitch Framing)
+
+The pitch needs a villain and a turning point:
+
+1. **Villain:** For 12 years, Kenyan farmers faced 2-year prison sentences for sharing seeds their grandmothers grew. Commercial seed companies lobbied for this criminalization.
+2. **Turning point:** In 2025, Kenya's High Court struck it down. Sharing indigenous seeds is legal again.
+3. **Gap:** Legal freedom exists but practical infrastructure doesn't. 90% of seed flows through invisible informal networks. No way to discover, verify, or trace.
+4. **Solution:** Sambaza Mbegu makes the invisible network visible. Graph captures who grows what, where it thrives, how it got there.
+5. **Stakes:** Without this tool, varieties go extinct when elderly farmers die. With it, 40 years of agricultural knowledge becomes searchable, shareable, permanent.
+
+### Credibility Anchors
+
+Things that make it feel real rather than a student project:
+
+- **One real farmer video** (30 seconds, phone recording): "I grow this sorghum my grandmother gave me, my neighbor doesn't know I have it." Even one voice from Machakos transforms the pitch.
+- **The court ruling citation**: Reference the actual 2025 High Court decision. Shows you did the research.
+- **Specific numbers from real sources**: 7M farming households, 7,000 extension workers, 63% arable land now acidic, KES 350/kg commercial seed cost. Grounds the project in reality.
+- **Specific Kenyan seed names in Kikamba/Kiswahili**: The data model uses real variety names (Mtama wa Gadam, Nthooko ya Katumani). Shows domain knowledge.
+
+### Before/After (One Slide)
+
+| Without Sambaza Mbegu | With Sambaza Mbegu |
+|---|---|
+| Farmer asks 3 neighbors | Farmer finds 47 growers in 30km |
+| No provenance, no trust | 38-year cultivation trail, verified |
+| Variety dies with one elderly farmer | System detects extinction risk early |
+| No data for county agriculture policy | County sees coverage gaps in real-time |
+| Commercial seed: KES 350/kg | Indigenous exchange: free |
+
+---
+
+### Case Studies: What Happens Without Indigenous Seed Infrastructure
+
+**Nigeria: $363M/year lost to EU bean export ban**
+
+In 2015, the EU banned Nigerian dried bean imports due to high levels of dichlorvos (a pesticide banned in Europe). The ban persists to this day. Nigeria loses $363 million annually in foreign exchange. The root cause: farmers adopted commercial varieties that require heavy chemical pest control. Traditional cowpea varieties (like Kenya's Nthooko ya Kitui) have natural pest resistance bred over generations. They don't need dichlorvos. A tool that keeps pest-resistant indigenous varieties in circulation isn't just about farmer savings. It protects entire export markets from chemical contamination.
+
+**Nigeria: Ginger industry collapsed to zero exports**
+
+Nigeria was the world's third-largest ginger producer. In 2023, a fungal blight hit Kaduna State and wiped out 70% of ginger plantations across 2,500 hectares. By end of 2025, Nigeria's ginger exports fell from N26.2 billion to zero. Farmers lost N12 billion+. The government estimates 2-3 years to recover previous export volumes.
+
+The cause: monoculture. Thousands of hectares growing the same narrow set of commercial varieties. One disease swept through all of them because they shared the same genetic vulnerability. Traditional/indigenous ginger varieties with different resistance profiles existed but weren't widely cultivated or accessible. Genetic diversity is the biological insurance against exactly this kind of wipeout. A platform that maintains variety diversity and makes resistant alternatives discoverable is infrastructure against the next blight.
+
+**Zimbabwe: Half the national maize crop wiped out**
+
+Zimbabwe abandoned its traditional drought-resistant maize landraces in favour of new high-yield hybrid varieties promoted by seed companies and government programs. When drought hit, the hybrids failed catastrophically. The country lost approximately half its staple food crop, triggering famine. The traditional varieties those hybrids replaced had survived centuries of drought cycles. Zimbabwe is now reversing course, with BBC reporting families "ditching maize for indigenous grains" like sorghum and millet. But the varieties are harder to find because the sharing networks broke down during the hybrid push.
+
+**The argument for Sambaza Mbegu:**
+
+These aren't hypotheticals. They're recent history from neighboring countries. Kenya faces the same pressures: government subsidizes DAP fertilizer and commercial seed, 63% of arable land is now acidic from that DAP, and traditional varieties are disappearing as elderly farmers die without passing them on. Sambaza Mbegu is infrastructure that prevents the Zimbabwe and Nigeria outcomes from happening here.
+
+---
+
 
 ## Metrics That Matter
 
