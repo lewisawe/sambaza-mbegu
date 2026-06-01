@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.env
+
+# Node
+node_modules/
+dist/
+
+# Neo4j
+neo4j_data/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store

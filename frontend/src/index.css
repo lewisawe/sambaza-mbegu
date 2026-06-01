@@ -1,0 +1,349 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&family=Playfair+Display:wght@600;800&display=swap');
+
+:root {
+  --soil: #1c1917;
+  --soil-light: #292524;
+  --bark: #44403c;
+  --clay: #78716c;
+  --sand: #d6d3d1;
+  --grain: #faf9f7;
+  --amber: #d97706;
+  --amber-deep: #92400e;
+  --amber-light: #fef3c7;
+  --leaf: #365314;
+  --leaf-light: #4d7c0f;
+  --earth: #7c2d12;
+
+  --font-display: 'Playfair Display', serif;
+  --font-body: 'DM Sans', sans-serif;
+
+  --radius: 6px;
+  --shadow: 0 1px 3px rgba(28, 25, 23, 0.08);
+  --shadow-lg: 0 8px 24px rgba(28, 25, 23, 0.12);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--grain);
+  color: var(--soil);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Layout */
+.app { height: 100vh; display: flex; flex-direction: column; }
+
+.header {
+  background: var(--soil);
+  color: var(--grain);
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 3px solid var(--amber);
+}
+
+.header__brand { display: flex; align-items: center; gap: 0.75rem; }
+.header__icon { font-size: 1.5rem; opacity: 0.9; }
+.header__title { font-family: var(--font-display); font-size: 1.4rem; font-weight: 800; letter-spacing: -0.02em; }
+.header__subtitle { font-size: 0.75rem; opacity: 0.5; letter-spacing: 0.05em; text-transform: uppercase; }
+.header__stats { font-size: 0.8rem; opacity: 0.6; display: flex; gap: 0.5rem; }
+.header__dot { opacity: 0.3; }
+
+.layout { flex: 1; display: flex; overflow: hidden; }
+
+.sidebar {
+  width: 380px;
+  border-right: 1px solid var(--sand);
+  overflow-y: auto;
+  background: white;
+}
+
+.main { flex: 1; position: relative; }
+
+/* Search Panel */
+.search-panel { padding: 1.5rem; }
+
+.search-panel__header h2 {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--soil);
+}
+
+.search-panel__header p {
+  font-size: 0.85rem;
+  color: var(--clay);
+  margin-top: 0.25rem;
+}
+
+.search-panel__form {
+  margin-top: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.field label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--clay);
+  margin-bottom: 0.3rem;
+}
+
+.field select {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  border: 1.5px solid var(--sand);
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  color: var(--soil);
+  background: white;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.field select:focus {
+  outline: none;
+  border-color: var(--amber);
+}
+
+.btn-search {
+  margin-top: 0.5rem;
+  padding: 0.7rem;
+  background: var(--soil);
+  color: var(--grain);
+  border: none;
+  border-radius: var(--radius);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.btn-search:hover { background: var(--soil-light); }
+.btn-search:active { transform: scale(0.98); }
+.btn-search:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Results */
+.results { margin-top: 1.5rem; }
+
+.results__count {
+  font-size: 0.75rem;
+  color: var(--clay);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--sand);
+}
+
+.results__list { margin-top: 0.75rem; display: flex; flex-direction: column; gap: 0.5rem; }
+
+.result-card {
+  padding: 1rem;
+  border: 1.5px solid var(--sand);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.result-card::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--amber);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.result-card:hover {
+  border-color: var(--amber);
+  box-shadow: var(--shadow);
+}
+
+.result-card:hover::before { opacity: 1; }
+
+.result-card__crop {
+  font-size: 0.65rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--amber-deep);
+  background: var(--amber-light);
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 3px;
+}
+
+.result-card__local {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-top: 0.4rem;
+  color: var(--soil);
+}
+
+.result-card__name {
+  font-size: 0.8rem;
+  color: var(--clay);
+  margin-top: 0.1rem;
+}
+
+.result-card__footer {
+  margin-top: 0.6rem;
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.72rem;
+  color: var(--bark);
+}
+
+/* Map */
+.map { height: 100%; width: 100%; }
+
+.leaflet-container { font-family: var(--font-body); }
+
+.popup__name { font-weight: 700; font-size: 0.9rem; }
+.popup__seed { color: var(--amber-deep); font-weight: 500; margin-top: 0.2rem; }
+.popup__meta { font-size: 0.8rem; color: var(--bark); margin-top: 0.2rem; }
+.popup__location { font-size: 0.75rem; color: var(--clay); }
+
+/* Empty State */
+.empty-state {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  max-width: 320px;
+}
+
+.empty-state__icon { font-size: 3rem; margin-bottom: 1rem; opacity: 0.4; }
+.empty-state h2 { font-family: var(--font-display); font-size: 1.3rem; color: var(--soil); }
+.empty-state p { font-size: 0.9rem; color: var(--clay); margin-top: 0.5rem; line-height: 1.5; }
+
+/* Loader */
+.loader {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  background: rgba(250, 249, 247, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loader__seed {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 3px solid var(--sand);
+  border-top-color: var(--amber);
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Provenance View */
+.provenance-view { height: 100%; display: flex; flex-direction: column; }
+
+.provenance-view__header {
+  padding: 1rem 1.5rem;
+  background: white;
+  border-bottom: 1px solid var(--sand);
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.provenance-view__graph { flex: 1; background: var(--grain); }
+
+.btn-back {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--clay);
+  background: none;
+  border: 1.5px solid var(--sand);
+  padding: 0.4rem 0.75rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-back:hover { border-color: var(--bark); color: var(--soil); }
+
+/* Seed Detail */
+.seed-detail { display: flex; align-items: center; gap: 1.5rem; }
+
+.seed-detail__crop {
+  font-size: 0.65rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--amber-deep);
+}
+
+.seed-detail__local {
+  font-family: var(--font-display);
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.seed-detail__name { font-size: 0.8rem; color: var(--clay); }
+
+.seed-detail__meta { display: flex; gap: 1rem; }
+
+.seed-detail__tag { display: flex; flex-direction: column; }
+.seed-detail__label { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--clay); }
+.seed-detail__tag span:last-child { font-size: 0.85rem; font-weight: 500; }
+
+/* Provenance Graph */
+.provenance-graph { height: 100%; width: 100%; position: relative; }
+
+.provenance-graph__legend {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+  z-index: 10;
+  background: white;
+  border: 1px solid var(--sand);
+  border-radius: var(--radius);
+  padding: 0.6rem 1rem;
+  display: flex;
+  gap: 1rem;
+  font-size: 0.72rem;
+  color: var(--bark);
+  box-shadow: var(--shadow);
+}
+
+.legend-item { display: flex; align-items: center; gap: 0.4rem; }
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--amber-light);
+}
+
+.legend-dot--root { background: var(--amber-deep); }
+.legend-dot--node { background: var(--amber); }
+.legend-arrow { color: var(--amber); font-weight: 700; }
+
+.provenance-empty {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--clay);
+}
