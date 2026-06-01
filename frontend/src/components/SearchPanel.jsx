@@ -4,7 +4,7 @@ const COUNTIES = ['Machakos', 'Kitui', 'Makueni', 'Tharaka-Nithi', 'Meru', 'Embu
 const CROPS = ['Sorghum', 'Millet', 'Cowpea', 'Pigeon Pea', 'Green Gram', 'Maize']
 const TRAITS = ['Drought Resistant', 'Short Season', 'Pest Resistant', 'High Yield', 'Low Input']
 
-export default function SearchPanel({ onSearch, results, onSelect, loading }) {
+export default function SearchPanel({ onSearch, results, onSelect, onProvenance, loading, selectedIndex }) {
   const [crop, setCrop] = useState('')
   const [trait, setTrait] = useState('')
   const [county, setCounty] = useState('')
@@ -57,14 +57,26 @@ export default function SearchPanel({ onSearch, results, onSelect, loading }) {
           <p className="results__count">{results.length} varieties found</p>
           <div className="results__list">
             {results.map((r, i) => (
-              <article key={i} className="result-card" onClick={() => onSelect(r)}>
+              <article
+                key={i}
+                className={`result-card ${i === selectedIndex ? 'result-card--active' : ''}`}
+                onClick={() => onSelect(r, i)}
+              >
                 <div className="result-card__crop">{r.seed?.crop_type}</div>
                 <h4 className="result-card__local">{r.seed?.local_name}</h4>
                 <p className="result-card__name">{r.seed?.name}</p>
                 <div className="result-card__footer">
-                  <span>{r.farmer?.name}</span>
-                  <span>{r.location?.county}</span>
-                  <span>Since {r.grows_info?.since_year}</span>
+                  <span>👤 {r.farmer?.name}</span>
+                  <span>📍 {r.location?.county}</span>
+                  <span>🌱 Since {r.grows_info?.since_year}</span>
+                </div>
+                <div className="result-card__actions">
+                  <button
+                    className="btn-provenance"
+                    onClick={(e) => { e.stopPropagation(); onProvenance(r) }}
+                  >
+                    View provenance trail
+                  </button>
                 </div>
               </article>
             ))}

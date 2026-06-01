@@ -1,10 +1,18 @@
-import React, { useState, useEffect } from 'react'
-import { MapContainer, TileLayer, CircleMarker, Popup } from 'react-leaflet'
+import React, { useState, useEffect, useRef } from 'react'
+import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet'
 import SearchPanel from './components/SearchPanel'
 import ProvenanceGraph from './components/ProvenanceGraph'
 import SeedDetail from './components/SeedDetail'
 
 const KENYA_CENTER = [-0.8, 37.5]
+
+function FlyTo({ center, zoom }) {
+  const map = useMap()
+  useEffect(() => {
+    if (center) map.flyTo(center, zoom || 12, { duration: 1 })
+  }, [center, zoom])
+  return null
+}
 
 export default function App() {
   const [results, setResults] = useState([])
@@ -12,6 +20,8 @@ export default function App() {
   const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(false)
   const [selectedResult, setSelectedResult] = useState(null)
+  const [flyTarget, setFlyTarget] = useState(null)
+  const markerRefs = useRef({})
 
   useEffect(() => {
     fetch('/api/stats').then(r => r.json()).then(setStats).catch(() => {})
@@ -21,10 +31,28 @@ export default function App() {
     setLoading(true)
     setProvenance(null)
     setSelectedResult(null)
+    setFlyTarget(null)
     const qs = new URLSearchParams(params).toString()
     const res = await fetch(`/api/seeds/search?${qs}`)
-    setResults(await res.json())
+    const data = await res.json()
+    setResults(data)
     setLoading(false)
+    // Fly to first result if any
+    if (data.length && data[0].farmer?.lat) {
+      setFlyTarget([data[0].farmer.lat, data[0].farmer.lng])
+    }
+  }
+
+  const handleSelectResult = (result, index) => {
+    setSelectedResult(result)
+    if (result.farmer?.lat) {
+      setFlyTarget([result.farmer.lat, result.farmer.lng])
+    }
+    // Open the marker popup
+    setTimeout(() => {
+      const ref = markerRefs.current[index]
+      if (ref) ref.openPopup()
+    }, 600)
   }
 
   const handleProvenance = async (result) => {
@@ -37,7 +65,6 @@ export default function App() {
 
   const handleBack = () => {
     setProvenance(null)
-    setSelectedResult(null)
   }
 
   return (
@@ -61,7 +88,14 @@ export default function App() {
 
       <div className="layout">
         <aside className="sidebar">
-          <SearchPanel onSearch={handleSearch} results={results} onSelect={handleProvenance} loading={loading} />
+          <SearchPanel
+            onSearch={handleSearch}
+            results={results}
+            onSelect={handleSelectResult}
+            onProvenance={handleProvenance}
+            loading={loading}
+            selectedIndex={results.indexOf(selectedResult)}
+          />
         </aside>
 
         <main className="main">
@@ -82,11 +116,12 @@ export default function App() {
               </div>
             </div>
           ) : (
-            <MapContainer center={KENYA_CENTER} zoom={7} className="map" zoomControl={false}>
+            <MapContainer center={KENYA_CENTER} zoom={7} className="map" scrollWheelZoom={true} zoomControl={true}>
               <TileLayer
                 url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
                 attribution="&copy; CARTO"
               />
+              <FlyTo center={flyTarget} zoom={11} />
               {results.map((r, i) => r.farmer?.lat && (
                 <CircleMarker
                   key={i}
@@ -96,14 +131,17 @@ export default function App() {
                   fillOpacity={0.85}
                   color="#fef3c7"
                   weight={2}
-                  eventHandlers={{ click: () => handleProvenance(r) }}
+                  ref={el => { markerRefs.current[i] = el }}
                 >
-                  <Popup className="seed-popup">
-                    <div>
+                  <Popup>
+                    <div className="popup-content">
                       <p className="popup__name">{r.farmer.name}</p>
                       <p className="popup__seed">{r.seed?.local_name}</p>
                       <p className="popup__meta">{r.seed?.crop_type} · Since {r.grows_info?.since_year}</p>
                       <p className="popup__location">{r.location?.county} · {r.farmer.farm_size_acres} acres</p>
+                      <button className="popup__btn" onClick={() => handleProvenance(r)}>
+                        View seed provenance →
+                      </button>
                     </div>
                   </Popup>
                 </CircleMarker>
@@ -113,8 +151,8 @@ export default function App() {
 
           {!provenance && results.length === 0 && !loading && (
             <div className="empty-state">
-              <div className="empty-state__icon">𓇼</div>
-              <h2>Sambaza Mbegu — Share seeds, grow together</h2>
+              <div className="empty-state__icon">𓇌</div>
+              <h2>Discover indigenous seeds near you</h2>
               <p>Search by crop, trait, or county to find farmers growing traditional varieties adapted to your conditions.</p>
             </div>
           )}
