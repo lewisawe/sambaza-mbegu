@@ -13,12 +13,7 @@ export default function ProvenanceGraph({ data }) {
       record.chain.forEach((node, idx) => {
         const id = node.id || node.phone || `node-${idx}`
         if (!nodes.has(id)) {
-          nodes.set(id, {
-            id,
-            name: node.name,
-            isRoot: idx === 0,
-            depth: idx,
-          })
+          nodes.set(id, { id, name: node.name, isRoot: idx === 0, depth: idx })
         }
         if (idx > 0) {
           const sourceId = record.chain[idx - 1].id || record.chain[idx - 1].phone
@@ -34,43 +29,40 @@ export default function ProvenanceGraph({ data }) {
   }, [data])
 
   const paintNode = useCallback((node, ctx) => {
-    const size = node.isRoot ? 10 : 7
+    const size = node.isRoot ? 10 : 6
     ctx.beginPath()
     ctx.arc(node.x, node.y, size, 0, 2 * Math.PI)
-    ctx.fillStyle = node.isRoot ? '#92400e' : '#d97706'
+    ctx.fillStyle = node.isRoot ? '#ff4f2b' : '#f5f5f5'
     ctx.fill()
-    ctx.strokeStyle = '#fef3c7'
-    ctx.lineWidth = 2.5
-    ctx.stroke()
 
-    ctx.font = `${node.isRoot ? 'bold ' : ''}5px "DM Sans", sans-serif`
+    ctx.font = `${node.isRoot ? '600 ' : '400 '}5px Inter, sans-serif`
     ctx.textAlign = 'center'
-    ctx.fillStyle = '#1c1917'
+    ctx.fillStyle = '#bfbfbf'
     ctx.fillText(node.name || '', node.x, node.y + size + 8)
   }, [])
 
   if (!graphData.nodes.length) {
     return (
-      <div className="provenance-empty">
-        <p>No provenance trail found for this variety</p>
+      <div className="h-full flex items-center justify-center">
+        <p className="font-[var(--font-chivo-mono)] text-[14px] text-steel-mid">NO PROVENANCE TRAIL FOUND</p>
       </div>
     )
   }
 
   return (
-    <div className="provenance-graph">
-      <div className="provenance-graph__legend">
-        <div className="legend-item">
-          <span className="legend-dot legend-dot--root"></span>
-          <span>Origin farmer</span>
+    <div className="h-full w-full relative">
+      <div className="absolute bottom-4 left-4 z-10 bg-void-black border border-graphite-border px-4 py-3 flex gap-4 font-[var(--font-chivo-mono)] text-[11px] text-fog-light">
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 bg-ember-orange"></span>
+          <span>ORIGIN</span>
         </div>
-        <div className="legend-item">
-          <span className="legend-dot legend-dot--node"></span>
-          <span>Received seed</span>
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 bg-bone-white"></span>
+          <span>RECEIVED</span>
         </div>
-        <div className="legend-item">
-          <span className="legend-arrow">→</span>
-          <span>Shared to</span>
+        <div className="flex items-center gap-2">
+          <span className="text-ember-orange">→</span>
+          <span>SHARED TO</span>
         </div>
       </div>
       <ForceGraph2D
@@ -84,9 +76,9 @@ export default function ProvenanceGraph({ data }) {
         }}
         linkDirectionalArrowLength={8}
         linkDirectionalArrowRelPos={0.85}
-        linkColor={() => '#d97706'}
-        linkWidth={2}
-        linkLineDash={[4, 2]}
+        linkColor={() => '#3c3c3c'}
+        linkWidth={1.5}
+        backgroundColor="#1a1a1a"
         d3VelocityDecay={0.3}
         cooldownTicks={60}
       />

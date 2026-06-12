@@ -113,3 +113,9 @@ async def recommend_seeds(
         result = session.run(query, params)
         records = [dict(r) for r in result]
     return records
+
+
+@router.get("/{seed_id}/story")
+async def get_provenance_story(seed_id: str):
+    from app.services.provenance_story_service import provenance_story_service
+    return provenance_story_service.generate_story(seed_id)

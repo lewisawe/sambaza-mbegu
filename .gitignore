@@ -11,9 +11,24 @@ dist/
 # Neo4j
 neo4j_data/
 
+# Postgres
+pg_data/
+
+# Redis
+redis_data/
+
 # IDE
 .vscode/
 .idea/
+.kiro/
 
 # OS
 .DS_Store
+
+# Design
+DESIGN.md
+PRODUCT_SPEC.md
+
+# Test
+.hypothesis/
+.pytest_cache/

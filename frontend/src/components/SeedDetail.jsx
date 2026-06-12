@@ -4,24 +4,28 @@ export default function SeedDetail({ result }) {
   if (!result) return null
 
   return (
-    <div className="seed-detail">
-      <div className="seed-detail__header">
-        <span className="seed-detail__crop">{result.seed?.crop_type}</span>
-        <h3 className="seed-detail__local">{result.seed?.local_name}</h3>
-        <p className="seed-detail__name">{result.seed?.name}</p>
+    <div className="flex items-center gap-6">
+      <div>
+        <span className="font-[var(--font-chivo-mono)] text-[11px] text-ember-orange uppercase">
+          {result.seed?.crop_type}
+        </span>
+        <h3 className="font-[var(--font-twk-everett)] text-[20px] font-light text-bone-white">
+          {result.seed?.local_name}
+        </h3>
+        <p className="text-[13px] text-fog-light">{result.seed?.name}</p>
       </div>
-      <div className="seed-detail__meta">
-        <div className="seed-detail__tag">
-          <span className="seed-detail__label">Grower</span>
-          <span>{result.farmer?.name}</span>
+      <div className="flex gap-6 font-[var(--font-chivo-mono)] text-[12px]">
+        <div className="flex flex-col">
+          <span className="text-steel-mid text-[10px] uppercase">GROWER</span>
+          <span className="text-bone-white">{result.farmer?.name}</span>
         </div>
-        <div className="seed-detail__tag">
-          <span className="seed-detail__label">Since</span>
-          <span>{result.grows_info?.since_year}</span>
+        <div className="flex flex-col">
+          <span className="text-steel-mid text-[10px] uppercase">SINCE</span>
+          <span className="text-bone-white">{result.grows_info?.since_year}</span>
         </div>
-        <div className="seed-detail__tag">
-          <span className="seed-detail__label">Location</span>
-          <span>{result.location?.county}</span>
+        <div className="flex flex-col">
+          <span className="text-steel-mid text-[10px] uppercase">COUNTY</span>
+          <span className="text-bone-white">{result.location?.county}</span>
         </div>
       </div>
     </div>

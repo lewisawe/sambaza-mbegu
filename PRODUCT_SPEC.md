@@ -440,13 +440,13 @@ Search results: {graph_results_json}
 
 ### AI Roadmap
 
-| Layer | Phase | Bounty |
-|-------|-------|--------|
-| Natural Language Search | Hackathon MVP | Featherless |
-| Recommendation Reasoning | Hackathon MVP | Featherless |
-| Provenance Storytelling | Post-hackathon | Featherless |
-| Variety Gap Detection | Phase 2 | Featherless |
-| Swahili/Kikamba Voice | Phase 2 | Featherless + Whisper |
+| Layer | Phase | Bounty | Status |
+|-------|-------|--------|--------|
+| Natural Language Search | Hackathon MVP | Featherless | ✅ DONE |
+| Recommendation Reasoning | Hackathon MVP | Featherless | ✅ DONE |
+| Provenance Storytelling | Post-hackathon | Featherless | |
+| Variety Gap Detection | Phase 2 | Featherless | |
+| Swahili/Kikamba Voice | Phase 2 | Featherless + Whisper | |
 
 ---
 
