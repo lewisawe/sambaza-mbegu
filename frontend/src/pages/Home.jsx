@@ -15,31 +15,6 @@ const STAT_ITEMS = [
   { key: 'counties', label: 'Counties' },
 ]
 
-// Minimal inline nav/footer for Phase 2; replaced by the shared public
-// layout (Nav/Footer) in Phase 3.
-function MiniNav() {
-  return (
-    <nav className="flex items-center justify-between px-6 py-5 bg-warm-canvas">
-      <Link to="/" className="font-[var(--font-display)] text-2xl uppercase tracking-tight text-carbon-black">Kimur</Link>
-      <div className="flex items-center gap-3">
-        <Link to="/login" className="font-[var(--font-mono)] text-xs uppercase tracking-widest text-slate hover:text-carbon-black">Log in</Link>
-        <Link to="/register" className="font-[var(--font-mono)] text-xs uppercase tracking-widest bg-carbon-black text-paper-white px-4 py-2 rounded-[var(--radius-md)] hover:bg-graphite">Sign up</Link>
-      </div>
-    </nav>
-  )
-}
-
-function MiniFooter() {
-  return (
-    <footer className="bg-carbon-black text-ash px-6 py-10 font-[var(--font-mono)] text-xs">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <span className="font-[var(--font-display)] text-xl text-paper-white uppercase">Kimur</span>
-        <span>Kenya's indigenous seed network.</span>
-      </div>
-    </footer>
-  )
-}
-
 export default function Home() {
   const [stats, setStats] = useState(null)
   const [statsError, setStatsError] = useState(false)
@@ -53,8 +28,6 @@ export default function Home() {
 
   return (
     <div className="bg-warm-canvas text-carbon-black font-[var(--font-body)]">
-      <MiniNav />
-
       {/* Hero */}
       <section className="px-6 pt-10 pb-20 max-w-[1100px] mx-auto">
         <p className="font-[var(--font-mono)] text-xs uppercase tracking-[0.3em] text-slate mb-6">
@@ -167,8 +140,6 @@ export default function Home() {
           </Link>
         </div>
       </section>
-
-      <MiniFooter />
     </div>
   )
 }
