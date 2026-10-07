@@ -1,6 +1,7 @@
 @import "tailwindcss";
 
 @theme {
+  /* --- Existing dark /app experience tokens (kept so AppShell renders unchanged) --- */
   --color-ember-orange: #ff4f2b;
   --color-void-black: #000000;
   --color-carbon: #1a1a1a;
@@ -12,6 +13,39 @@
   --font-twk-everett: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-switzer: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-chivo-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* --- Kimur brutalist-editorial palette (public pages) --- */
+  --color-carbon-black: #000000;
+  --color-paper-white: #ffffff;
+  --color-warm-canvas: #e5e5e5;
+  --color-mist-gray: #f3f3f3;
+  --color-ash: #c6c6c6;
+  --color-smoke: #979797;
+  --color-slate: #444444;
+  --color-graphite: #2f2f2f;
+  --color-mint-chip: #d1ffca;
+  --color-voltage-yellow: #fff100;
+
+  /* --- Kimur typography --- */
+  --font-display: 'Anton', 'Bebas Neue', 'Arial Narrow', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* --- Kimur type scale --- */
+  --text-giant: 7rem;
+  --text-mega: 4.5rem;
+  --text-huge: 3rem;
+  --text-xl: 2rem;
+  --text-lg: 1.5rem;
+  --text-md: 1.125rem;
+  --text-sm: 0.875rem;
+  --text-xs: 0.75rem;
+
+  /* --- Kimur radii --- */
+  --radius-xl: 2rem;
+  --radius-lg: 1.25rem;
+  --radius-md: 0.75rem;
+  --radius-sm: 0.375rem;
 }
 
 @layer base {
