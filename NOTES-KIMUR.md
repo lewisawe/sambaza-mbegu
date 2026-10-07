@@ -147,6 +147,29 @@ Alternates:
 - Vite emits a >500 kB chunk-size warning (leaflet + force-graph). Non-blocking; a future
   `manualChunks` split would quiet it.
 
+## Production deployment
+
+Single-instance EC2 deploy ("everything in 1"): one box runs the whole stack via
+`docker-compose.prod.yml` — Caddy (TLS + SPA + `/api` proxy) in front of the FastAPI
+backend plus containerized Neo4j + Postgres + Redis. No managed DBs, no load balancer.
+Full runbook: [`deploy/DEPLOY.md`](deploy/DEPLOY.md).
+
+New files authored for prod (additive — the dev `docker-compose.yml` is untouched):
+
+- `backend/Dockerfile` — backend image (`python:3.12-slim`, prebuilt wheels).
+- `backend/.dockerignore`
+- `frontend/Dockerfile` — builds the SPA and bakes it into a Caddy image (the `caddy`
+  service IS the frontend image).
+- `frontend/.dockerignore`
+- `deploy/Caddyfile` — TLS, SPA fallback, `www`→apex redirect, `/api/*` reverse proxy.
+- `deploy/DEPLOY.md` — the step-by-step operator runbook.
+- `docker-compose.prod.yml` — prod stack: no DB host ports, `*_prod` named volumes,
+  secrets from `.env.prod`, and a one-shot `seed` service behind the `seed` profile.
+- `.env.prod.example` — secrets template (`.env.prod` itself is gitignored).
+
+Seeding is the `seed` compose service (profile `seed`), which runs `init_db.py`,
+`seed_data.py`, `seed_users.py`, `seed_listings.py` in order once, then exits.
+
 ## Verification evidence (this build)
 
 - Frontend `npm run build`: **PASS** at the end of every frontend-touching phase and
