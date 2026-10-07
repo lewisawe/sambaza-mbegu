@@ -1,10 +1,8 @@
 import os
-import httpx
 from app.db import get_session
 from app.services.voice_service import voice_service
+from app.services.llm_provider import complete
 
-FEATHERLESS_API_KEY = os.getenv("FEATHERLESS_API_KEY", "")
-FEATHERLESS_URL = "https://api.featherless.ai/v1/chat/completions"
 META_TOKEN = os.getenv("META_WHATSAPP_TOKEN", "")
 META_PHONE_ID = os.getenv("META_PHONE_NUMBER_ID", "")
 
@@ -51,24 +49,16 @@ class WhatsAppService:
     def _generate_recommendation(self, intent, results: list, language: str) -> str:
         if not results:
             return "No matching seeds found."
-        if not FEATHERLESS_API_KEY:
-            lines = [f"• {r['variety']} from {r['name']} in {r['county']}" for r in results]
-            return f"Found {len(results)} growers:\n" + "\n".join(lines)
+        # Deterministic fallback used when the LLM is unavailable (no key /
+        # provider 'none') or returns nothing — preserves prior behavior.
+        fallback_lines = [f"• {r['variety']} from {r['name']} in {r['county']}" for r in results]
+        fallback = f"Found {len(results)} growers:\n" + "\n".join(fallback_lines)
         import json
         prompt = f"""You are a Kenyan agricultural advisor. A farmer is looking for {intent.crop or 'seeds'}.
 Here are available growers: {json.dumps(results)}
 Write a brief recommendation (2-3 sentences) explaining why these are good options. Be concise."""
-        resp = httpx.post(
-            FEATHERLESS_URL,
-            headers={"Authorization": f"Bearer {FEATHERLESS_API_KEY}"},
-            json={"model": "meta-llama/Meta-Llama-3.1-8B-Instruct", "messages": [{"role": "user", "content": prompt}], "max_tokens": 150},
-            timeout=10,
-        )
-        try:
-            return resp.json()["choices"][0]["message"]["content"]
-        except Exception:
-            lines = [f"• {r['variety']} from {r['name']}" for r in results]
-            return "\n".join(lines)
+        result = complete(prompt, max_tokens=150, temperature=0.1)
+        return result or fallback
 
 
 whatsapp_service = WhatsAppService()

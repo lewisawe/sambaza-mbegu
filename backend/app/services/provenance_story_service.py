@@ -1,10 +1,6 @@
-import os
 import json
-import httpx
 from app.db import get_session
-
-FEATHERLESS_API_KEY = os.getenv("FEATHERLESS_API_KEY", "")
-FEATHERLESS_URL = "https://api.featherless.ai/v1/chat/completions"
+from app.services.llm_provider import complete
 
 
 class ProvenanceStoryService:
@@ -39,8 +35,7 @@ class ProvenanceStoryService:
             return [dict(rec) for rec in result]
 
     def _call_llm(self, chain_json: str, event_count: int) -> str:
-        if not FEATHERLESS_API_KEY:
-            return f"This variety has a provenance chain of {event_count} sharing events."
+        fallback = f"This variety has a provenance chain of {event_count} sharing events."
         length_instruction = "Summarize in 3-4 sentences." if event_count > 5 else "Write 2-3 sentences."
         prompt = f"""You are writing a provenance story for a Kenyan indigenous seed variety.
 Based on this sharing history, write a compelling narrative about the seed's journey.
@@ -48,16 +43,8 @@ Based on this sharing history, write a compelling narrative about the seed's jou
 Highlight: origin, geographic spread, years of cultivation, and any notable survival.
 
 Provenance data: {chain_json}"""
-        resp = httpx.post(
-            FEATHERLESS_URL,
-            headers={"Authorization": f"Bearer {FEATHERLESS_API_KEY}"},
-            json={"model": "meta-llama/Meta-Llama-3.1-8B-Instruct", "messages": [{"role": "user", "content": prompt}], "max_tokens": 200},
-            timeout=15,
-        )
-        try:
-            return resp.json()["choices"][0]["message"]["content"]
-        except Exception:
-            return f"This variety has been shared across {event_count} growers over multiple regions."
+        result = complete(prompt, max_tokens=200, temperature=0.1)
+        return result or fallback
 
 
 provenance_story_service = ProvenanceStoryService()

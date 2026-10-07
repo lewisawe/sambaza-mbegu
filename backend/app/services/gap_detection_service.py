@@ -1,11 +1,7 @@
-import os
-import httpx
 from sqlalchemy import text
 from app.db import get_session
 from app.postgres import SessionLocal
-
-FEATHERLESS_API_KEY = os.getenv("FEATHERLESS_API_KEY", "")
-FEATHERLESS_URL = "https://api.featherless.ai/v1/chat/completions"
+from app.services.llm_provider import complete
 
 
 class GapDetectionService:
@@ -58,20 +54,11 @@ class GapDetectionService:
         return sorted(gaps, key=lambda g: g["demand_count"], reverse=True)
 
     def generate_summary(self, gap: dict) -> str:
-        if not FEATHERLESS_API_KEY:
-            return f"High demand for {gap['crop']} in {gap['county']} with no local growers. {gap['demand_count']} searches recorded. Nearest source: {gap.get('nearest_source', 'unknown')}."
         import json
+        fallback = f"High demand for {gap['crop']} in {gap['county']} with no local growers. {gap['demand_count']} searches recorded. Nearest source: {gap.get('nearest_source', 'unknown')}."
         prompt = f"Write a one-sentence human-readable summary of this seed coverage gap for a county agriculture officer: {json.dumps(gap)}"
-        resp = httpx.post(
-            FEATHERLESS_URL,
-            headers={"Authorization": f"Bearer {FEATHERLESS_API_KEY}"},
-            json={"model": "meta-llama/Meta-Llama-3.1-8B-Instruct", "messages": [{"role": "user", "content": prompt}], "max_tokens": 100},
-            timeout=10,
-        )
-        try:
-            return resp.json()["choices"][0]["message"]["content"]
-        except Exception:
-            return f"Gap: {gap['crop']} in {gap['county']}, {gap['demand_count']} searches, 0 local growers."
+        result = complete(prompt, max_tokens=100, temperature=0.1)
+        return result or fallback
 
 
 gap_detection_service = GapDetectionService()

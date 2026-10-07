@@ -1,15 +1,10 @@
-import os
 import json
-import httpx
 from fastapi import APIRouter
 from pydantic import BaseModel
 from app.db import get_session
+from app.services.llm_provider import acomplete
 
 router = APIRouter()
-
-FEATHERLESS_API_KEY = os.getenv("FEATHERLESS_API_KEY", "")
-FEATHERLESS_URL = "https://api.featherless.ai/v1/chat/completions"
-MODEL = "meta-llama/Meta-Llama-3.1-8B-Instruct"
 
 EXTRACT_PROMPT = """You are a seed search assistant for Kenyan farmers.
 Extract search parameters from the farmer's message.
@@ -40,21 +35,9 @@ class AISearchRequest(BaseModel):
 
 
 async def call_llm(prompt: str) -> str:
-    if not FEATHERLESS_API_KEY:
-        return ""
-    async with httpx.AsyncClient(timeout=30) as client:
-        resp = await client.post(
-            FEATHERLESS_URL,
-            headers={"Authorization": f"Bearer {FEATHERLESS_API_KEY}", "Content-Type": "application/json"},
-            json={
-                "model": MODEL,
-                "messages": [{"role": "user", "content": prompt}],
-                "max_tokens": 512,
-                "temperature": 0.1,
-            },
-        )
-        resp.raise_for_status()
-        return resp.json()["choices"][0]["message"]["content"]
+    # Routed through the swappable provider; returns "" when no provider/key
+    # is configured, preserving the original graceful-fallback behavior.
+    return await acomplete(prompt, max_tokens=512, temperature=0.1)
 
 
 def build_query(params: dict) -> tuple[str, dict]:
@@ -122,7 +105,7 @@ async def ai_search(req: AISearchRequest):
 
     # Step 3: Generate recommendation reasoning
     recommendation = ""
-    if records and FEATHERLESS_API_KEY:
+    if records:
         summary = [
             {
                 "variety": r["seed"].get("local_name"),
