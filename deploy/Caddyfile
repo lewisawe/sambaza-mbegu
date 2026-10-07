@@ -1,0 +1,39 @@
+# Kimur production Caddyfile.
+#
+# Serves the SPA static build (baked into the frontend/Caddy image at /srv)
+# and reverse-proxies the API to the backend container by service name.
+# Automatic HTTPS is Caddy's default: the .app TLD is HTTPS-only / HSTS
+# preloaded, so Caddy obtains and renews Let's Encrypt certs once DNS for
+# kimur.app + www.kimur.app points at this box (ports 80/443 reachable).
+
+# Redirect www -> apex (canonical host).
+www.kimur.app {
+	redir https://kimur.app{uri} permanent
+}
+
+kimur.app {
+	root * /srv
+
+	# Security headers applied to every response.
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		# Caddy adds its own Server header value; drop version noise.
+		-Server
+	}
+
+	# API: proxy to the backend container on the compose network.
+	# Path is preserved (no rewrite) — FastAPI routers mount under /api/*.
+	handle /api/* {
+		reverse_proxy backend:8000
+	}
+
+	# SPA: everything else serves the static build, with client-side routes
+	# (react-router) falling back to index.html so deep-link refreshes work.
+	handle {
+		try_files {path} /index.html
+		file_server
+	}
+}

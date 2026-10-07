@@ -1,0 +1,124 @@
+# Kimur production stack — single-instance EC2 ("everything in 1").
+#
+# Additive to the dev docker-compose.yml (which stays untouched). Differences
+# from dev: NO databases exposed to the host, named *_prod volumes so prod and
+# dev data never collide, all secrets injected via .env.prod (gitignored), and
+# an edge Caddy container terminating TLS + serving the SPA + proxying /api/*.
+#
+# Bring up:   docker compose -f docker-compose.prod.yml up -d --build
+# Seed once:  docker compose -f docker-compose.prod.yml --profile seed run --rm seed
+# See deploy/DEPLOY.md for the full runbook.
+
+services:
+  # Edge: the frontend image IS the Caddy server (built in frontend/Dockerfile).
+  # Serves /srv (SPA dist) and reverse-proxies /api/* to backend:8000.
+  caddy:
+    build:
+      context: ./frontend
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      backend:
+        condition: service_started
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+    # NO host ports — only reachable inside the compose network (via Caddy).
+    env_file:
+      - .env.prod
+    depends_on:
+      neo4j:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  neo4j:
+    image: neo4j:5
+    # NO host ports. For debugging use `docker compose exec neo4j cypher-shell`
+    # or an SSH tunnel (see DEPLOY.md).
+    environment:
+      NEO4J_AUTH: ${NEO4J_AUTH}
+      NEO4J_PLUGINS: '["apoc"]'
+    volumes:
+      - neo4j_data_prod:/data
+    healthcheck:
+      # Neo4j HTTP endpoint is up once the DB is ready to serve.
+      test: ["CMD-SHELL", "wget -qO- http://localhost:7474 >/dev/null 2>&1 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 40s
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    # NO host ports.
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - pg_data_prod:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    # NO host ports.
+    volumes:
+      - redis_data_prod:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    restart: unless-stopped
+
+  # One-shot seeding. Only runs when explicitly selected via --profile seed,
+  # never on a normal `up`. Reuses the backend image + prod env, waits for the
+  # DBs to be healthy, runs the four scripts in order, then exits.
+  # Seed data is synthetic/demo (Kenyan farmers + seed varieties) — acceptable
+  # for launch. Run ONCE:
+  #   docker compose -f docker-compose.prod.yml --profile seed run --rm seed
+  seed:
+    profiles: ["seed"]
+    build:
+      context: ./backend
+    env_file:
+      - .env.prod
+    depends_on:
+      neo4j:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    command: >
+      sh -c "python init_db.py &&
+             python seed_data.py &&
+             python seed_users.py &&
+             python seed_listings.py"
+    restart: "no"
+
+volumes:
+  caddy_data:
+  caddy_config:
+  neo4j_data_prod:
+  pg_data_prod:
+  redis_data_prod:

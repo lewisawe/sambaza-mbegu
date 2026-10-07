@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
@@ -12,9 +13,13 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Sambaza Mbegu", lifespan=lifespan)
 
+# CORS origins are env-driven (comma-separated) and default to "*" so dev and
+# tests are unaffected. Prod can restrict via CORS_ALLOW_ORIGINS in .env.prod.
+_origins = [o.strip() for o in os.getenv("CORS_ALLOW_ORIGINS", "*").split(",") if o.strip()]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
