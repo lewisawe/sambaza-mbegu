@@ -375,8 +375,8 @@ export default function AppShell() {
             ) : (
               <MapContainer center={KENYA_CENTER} zoom={7} className="h-full w-full" scrollWheelZoom={true} zoomControl={true}>
                 <TileLayer
-                  url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
-                  attribution="&copy; CARTO"
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                 />
                 <FlyTo center={flyTarget} zoom={11} />
                 <ExtinctionRiskLayer visible={showExtinctionRisk} />
@@ -387,7 +387,7 @@ export default function AppShell() {
                     radius={8}
                     fillColor="#ff4f2b"
                     fillOpacity={0.9}
-                    color="#f5f5f5"
+                    color="#000000"
                     weight={1.5}
                     ref={el => { markerRefs.current[i] = el }}
                   >
