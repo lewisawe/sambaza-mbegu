@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet'
 import SearchPanel from '../components/SearchPanel'
 import ProvenanceGraph from '../components/ProvenanceGraph'
@@ -177,6 +177,7 @@ export default function AppShell() {
               {roleCfg.verification && (
                 <button onClick={() => setActivePanel(activePanel === 'verification' ? null : 'verification')} className="border border-graphite-border text-bone-white font-[var(--font-chivo-mono)] text-[11px] uppercase px-2 py-1.5 hover:border-ember-orange">VERIFY</button>
               )}
+              <Link to="/app/profile" className="text-[11px] text-steel-mid hover:text-bone-white font-[var(--font-chivo-mono)] uppercase">PROFILE</Link>
               <button onClick={() => { localStorage.clear(); setUser(null); setActivePanel(null); navigate('/') }} className="text-[11px] text-steel-mid hover:text-red-400 font-[var(--font-chivo-mono)]">LOGOUT</button>
             </>
           ) : (

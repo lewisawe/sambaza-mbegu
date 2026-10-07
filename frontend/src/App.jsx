@@ -2,6 +2,9 @@ import React from 'react'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import AppShell from './app/AppShell'
 import RequireAuth from './app/RequireAuth'
+import Profile from './app/Profile'
+import Settings from './app/Settings'
+import Onboarding from './app/Onboarding'
 import PublicLayout from './pages/PublicLayout'
 import Home from './pages/Home'
 import About from './pages/About'
@@ -37,6 +40,9 @@ const router = createBrowserRouter([
     element: <RequireAuth />,
     children: [
       { path: '/app', element: <AppShell /> },
+      { path: '/app/profile', element: <Profile /> },
+      { path: '/app/settings', element: <Settings /> },
+      { path: '/app/onboarding', element: <Onboarding /> },
     ],
   },
 ])
