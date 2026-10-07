@@ -182,3 +182,38 @@ Seeding is the `seed` compose service (profile `seed`), which runs `init_db.py`,
   grow_links:490, shares:94, counties:6}` (keys match `Home.jsx`).
 - Backend property suite: **29 passed** (24 pre-existing + 5 new LLM-provider tests);
   `import app.main` clean; no-key `complete()` → `''`.
+
+## Public site enrichment
+
+The marketing site was enriched with real photography, the Kimur logo, live stats,
+and a new seed-catalog page. Commit: `feat(public): enrich marketing site with real
+photography, logo, and live data`.
+
+New files:
+
+- `frontend/src/pages/Varieties.jsx` — seed-catalog page (new `/varieties` route).
+- `frontend/src/components/public/VarietyCard.jsx` — card component for a seed variety.
+- `frontend/src/lib/seedFormat.js` — formatting helpers for seed/variety data.
+- `frontend/src/assets/Kimur_logo.svg` — brand logo (used in nav/footer).
+- `frontend/src/assets/img/*.webp` — optimized photography (see sizes below).
+
+Changed files:
+
+- `frontend/src/App.jsx` — register the new `/varieties` route.
+- `frontend/src/components/public/Nav.jsx` — logo + Varieties nav link.
+- `frontend/src/components/public/Footer.jsx` — logo in footer.
+- `frontend/src/pages/Home.jsx` — hero photography + live stats, richer sections.
+- `frontend/src/pages/About.jsx`, `HowItWorks.jsx`, `Channels.jsx`,
+  `ForInstitutions.jsx` — photography and fuller copy/sections.
+
+Optimized image assets (WebP, from `ls -la frontend/src/assets/img/`):
+
+- `hero-garden.webp` — 306062 bytes (~299 KB)
+- `seeds.webp` — 292788 bytes (~286 KB)
+- `planting.webp` — 265882 bytes (~260 KB)
+- `seeds-sack.webp` — 121730 bytes (~119 KB)
+- `women-farmers.webp` — 97400 bytes (~95 KB)
+- `male-farmers.webp` — 71510 bytes (~70 KB)
+- `growing.webp` — 50272 bytes (~49 KB)
+
+New route: `/varieties` (public, rendered by `pages/Varieties.jsx`).
