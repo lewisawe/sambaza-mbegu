@@ -8,10 +8,12 @@ import RecommendationCard from '../components/RecommendationCard'
 import AuthPanel from '../components/AuthPanel'
 import ExchangePanel from '../components/ExchangePanel'
 import ListingPanel from '../components/ListingPanel'
+import VerificationPanel from '../components/VerificationPanel'
 import ExtinctionRiskLayer from '../components/ExtinctionRiskLayer'
 import NetworkVulnerability from '../components/NetworkVulnerability'
 import GapSplitView from '../components/GapSplitView'
 import SeasonalCalendar from '../components/SeasonalCalendar'
+import { configForRole } from './roleConfig'
 
 const KENYA_CENTER = [-0.8, 37.5]
 
@@ -49,6 +51,9 @@ export default function AppShell() {
   const [activePanel, setActivePanel] = useState(null)
   const [sidebarWidth, setSidebarWidth] = useState(400)
   const markerRefs = useRef({})
+
+  // Role-aware dashboard config (reorg + gating only; see roleConfig.js)
+  const roleCfg = configForRole(user?.role)
 
   useEffect(() => {
     fetch('/api/stats').then(r => r.json()).then(setStats).catch(() => {})
@@ -162,11 +167,15 @@ export default function AppShell() {
           </button>
           {user ? (
             <>
-              {user.role === 'farmer' && (
+              <span className="hidden md:inline text-[10px] text-steel-mid font-[var(--font-chivo-mono)] uppercase mr-1">{roleCfg.label}</span>
+              {roleCfg.share && (
                 <>
                   <button onClick={() => setActivePanel(activePanel === 'listing' ? null : 'listing')} className="border border-graphite-border text-bone-white font-[var(--font-chivo-mono)] text-[11px] uppercase px-2 py-1.5 hover:border-ember-orange">SHARE</button>
                   <button onClick={() => setActivePanel(activePanel === 'exchanges' ? null : 'exchanges')} className="border border-graphite-border text-bone-white font-[var(--font-chivo-mono)] text-[11px] uppercase px-2 py-1.5 hover:border-ember-orange">EXCHANGES</button>
                 </>
+              )}
+              {roleCfg.verification && (
+                <button onClick={() => setActivePanel(activePanel === 'verification' ? null : 'verification')} className="border border-graphite-border text-bone-white font-[var(--font-chivo-mono)] text-[11px] uppercase px-2 py-1.5 hover:border-ember-orange">VERIFY</button>
               )}
               <button onClick={() => { localStorage.clear(); setUser(null); setActivePanel(null); navigate('/') }} className="text-[11px] text-steel-mid hover:text-red-400 font-[var(--font-chivo-mono)]">LOGOUT</button>
             </>
@@ -290,14 +299,22 @@ export default function AppShell() {
       {/* Main layout */}
       {!showHero && !showHowItWorks && (
         <div className="flex-1 flex flex-col overflow-hidden" id="search">
-          {/* Feature toolbar */}
+          {/* Feature toolbar — analytics layers gated by role */}
+          {(roleCfg.analytics || roleCfg.calendar) && (
           <div className="flex items-center gap-2 px-4 py-2 bg-carbon border-b border-graphite-border">
             <span className="text-[10px] text-steel-mid font-[var(--font-chivo-mono)] mr-2">LAYERS:</span>
-            <button onClick={() => setShowExtinctionRisk(!showExtinctionRisk)} className={`text-[10px] font-[var(--font-chivo-mono)] px-2 py-1 border ${showExtinctionRisk ? 'border-red-500 text-red-400 bg-red-500/10' : 'border-graphite-border text-steel-mid hover:text-bone-white'}`}>⚠️ AT RISK</button>
-            <button onClick={() => setShowNetworkVuln(true)} className="text-[10px] font-[var(--font-chivo-mono)] px-2 py-1 border border-graphite-border text-steel-mid hover:text-bone-white">🕸️ VULNERABILITY</button>
-            <button onClick={() => setShowGapView(true)} className="text-[10px] font-[var(--font-chivo-mono)] px-2 py-1 border border-graphite-border text-steel-mid hover:text-bone-white">📊 GAPS</button>
-            <button onClick={() => setShowCalendar(true)} className="text-[10px] font-[var(--font-chivo-mono)] px-2 py-1 border border-graphite-border text-steel-mid hover:text-bone-white">📅 CALENDAR</button>
+            {roleCfg.analytics && (
+              <>
+                <button onClick={() => setShowExtinctionRisk(!showExtinctionRisk)} className={`text-[10px] font-[var(--font-chivo-mono)] px-2 py-1 border ${showExtinctionRisk ? 'border-red-500 text-red-400 bg-red-500/10' : 'border-graphite-border text-steel-mid hover:text-bone-white'}`}>⚠️ AT RISK</button>
+                <button onClick={() => setShowNetworkVuln(true)} className="text-[10px] font-[var(--font-chivo-mono)] px-2 py-1 border border-graphite-border text-steel-mid hover:text-bone-white">🕸️ VULNERABILITY</button>
+                <button onClick={() => setShowGapView(true)} className="text-[10px] font-[var(--font-chivo-mono)] px-2 py-1 border border-graphite-border text-steel-mid hover:text-bone-white">📊 GAPS</button>
+              </>
+            )}
+            {roleCfg.calendar && (
+              <button onClick={() => setShowCalendar(true)} className="text-[10px] font-[var(--font-chivo-mono)] px-2 py-1 border border-graphite-border text-steel-mid hover:text-bone-white">📅 CALENDAR</button>
+            )}
           </div>
+          )}
 
           <div className="flex-1 flex overflow-hidden">
           {/* Sidebar */}
@@ -440,6 +457,11 @@ export default function AppShell() {
       {activePanel === 'exchanges' && (
         <div className="fixed top-14 right-4 z-[1000] w-[340px] max-h-[70vh] overflow-y-auto bg-carbon border border-graphite-border shadow-2xl">
           <ExchangePanel />
+        </div>
+      )}
+      {activePanel === 'verification' && (
+        <div className="fixed top-14 right-4 z-[1000] w-[320px] bg-carbon border border-graphite-border shadow-2xl">
+          <VerificationPanel onSubmitted={() => setActivePanel(null)} />
         </div>
       )}
     </div>
