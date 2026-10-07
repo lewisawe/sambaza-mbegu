@@ -31,6 +31,10 @@ export default function Footer() {
               <Link to="/privacy" className="hover:text-paper-white">Privacy</Link>
               <Link to="/terms" className="hover:text-paper-white">Terms</Link>
             </div>
+            <div className="flex flex-col gap-2">
+              <span className="text-smoke uppercase tracking-widest">Contact</span>
+              <a href="mailto:info@kimur.app" className="hover:text-paper-white">info@kimur.app</a>
+            </div>
           </div>
         </div>
 

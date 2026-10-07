@@ -19,7 +19,9 @@ export default function Privacy() {
           </p>
           <p>
             You can request removal of your profile at any time through the channel you
-            registered on. This is a concise summary; a full policy will accompany public launch.
+            registered on, or by emailing{' '}
+            <a href="mailto:info@kimur.app" className="underline hover:text-carbon-black">info@kimur.app</a>.
+            This is a concise summary; a full policy will accompany public launch.
           </p>
         </div>
       </section>
