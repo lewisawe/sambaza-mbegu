@@ -41,7 +41,7 @@ export default function GapSplitView({ visible, onClose }) {
         <p className="text-[14px] text-fog-light mb-6">
           {mode === 'before'
             ? 'Red zones show wards where farmers search for varieties but no local growers exist within 20km.'
-            : 'Green zones show wards where Sambaza Mbegu connected farmers with nearby growers, filling coverage gaps.'}
+            : 'Green zones show wards where Kimur connected farmers with nearby growers, filling coverage gaps.'}
         </p>
 
         {/* County grid */}
