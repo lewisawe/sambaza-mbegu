@@ -1,5 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import womenFarmers from '../assets/img/women-farmers.webp'
 
 const USSD_TREE = `*384*738#   (738 = "SEW" for seed)
 
@@ -34,19 +35,30 @@ const SMS_KEYWORDS = [
 export default function Channels() {
   return (
     <main className="bg-warm-canvas text-carbon-black font-[var(--font-body)]">
-      <section className="max-w-[1100px] mx-auto px-6 pt-16 pb-12">
-        <p className="font-[var(--font-mono)] text-xs uppercase tracking-[0.3em] text-slate mb-6">Access channels</p>
-        <h1 className="font-[var(--font-display)] uppercase leading-[0.9] text-[clamp(2.5rem,7vw,5rem)]">
-          Any phone works.
-        </h1>
-        <p className="font-[var(--font-body)] text-lg text-slate mt-8 max-w-[620px] leading-relaxed">
-          Most Kenyan farmers use feature phones. Kimur meets them there, over USSD and
-          SMS, as well as WhatsApp and the web. The same seed graph powers all four.
-        </p>
+      <section className="max-w-[1200px] mx-auto px-6 pt-16 pb-12 grid lg:grid-cols-[1.1fr_0.9fr] gap-10 items-center">
+        <div>
+          <p className="font-[var(--font-mono)] text-xs uppercase tracking-[0.3em] text-slate mb-6">Access channels</p>
+          <h1 className="font-[var(--font-display)] uppercase leading-[0.9] text-[clamp(2.5rem,7vw,5rem)]">
+            Any phone works.
+          </h1>
+          <p className="font-[var(--font-body)] text-lg text-slate mt-8 max-w-[620px] leading-relaxed">
+            Most Kenyan farmers use feature phones. Kimur meets them there, over USSD and
+            SMS, as well as WhatsApp and the web. The same seed graph powers all four.
+          </p>
+        </div>
+        <div className="overflow-hidden rounded-[var(--radius-xl)] bg-mist-gray aspect-[4/5]">
+          <img
+            src={womenFarmers}
+            alt="A farmer using a mobile phone beside her indigenous crop"
+            width="640"
+            height="800"
+            className="w-full h-full object-cover"
+          />
+        </div>
       </section>
 
       {/* USSD */}
-      <section className="max-w-[1100px] mx-auto px-6 pb-12">
+      <section className="max-w-[1200px] mx-auto px-6 pb-12">
         <div className="bg-paper-white rounded-[var(--radius-lg)] p-8">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
             <h2 className="font-[var(--font-display)] text-2xl uppercase">USSD · widest reach</h2>
@@ -57,7 +69,7 @@ export default function Channels() {
       </section>
 
       {/* SMS */}
-      <section className="max-w-[1100px] mx-auto px-6 pb-12">
+      <section className="max-w-[1200px] mx-auto px-6 pb-12">
         <div className="bg-paper-white rounded-[var(--radius-lg)] p-8">
           <h2 className="font-[var(--font-display)] text-2xl uppercase">SMS · any phone, no session</h2>
           <div className="grid sm:grid-cols-2 gap-4 mt-5">
@@ -75,7 +87,7 @@ export default function Channels() {
       </section>
 
       {/* WhatsApp */}
-      <section className="max-w-[1100px] mx-auto px-6 pb-20">
+      <section className="max-w-[1200px] mx-auto px-6 pb-20">
         <div className="bg-mint-chip text-carbon-black rounded-[var(--radius-xl)] p-10">
           <h2 className="font-[var(--font-display)] text-2xl uppercase">WhatsApp · voice & text</h2>
           <ol className="font-[var(--font-body)] text-md mt-5 space-y-2 max-w-[620px] leading-relaxed list-decimal list-inside">
@@ -89,7 +101,7 @@ export default function Channels() {
         </div>
       </section>
 
-      <section className="max-w-[1100px] mx-auto px-6 pb-20">
+      <section className="max-w-[1200px] mx-auto px-6 pb-20">
         <Link to="/register" className="font-[var(--font-mono)] text-sm uppercase tracking-widest bg-carbon-black text-paper-white px-7 py-4 rounded-[var(--radius-md)] inline-block">
           Get started on the web
         </Link>

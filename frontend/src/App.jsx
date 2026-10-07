@@ -11,6 +11,7 @@ import About from './pages/About'
 import HowItWorks from './pages/HowItWorks'
 import ForInstitutions from './pages/ForInstitutions'
 import Channels from './pages/Channels'
+import Varieties from './pages/Varieties'
 import Privacy from './pages/Privacy'
 import Terms from './pages/Terms'
 import NotFound from './pages/NotFound'
@@ -29,6 +30,7 @@ const router = createBrowserRouter([
       { path: '/how-it-works', element: <HowItWorks /> },
       { path: '/for-institutions', element: <ForInstitutions /> },
       { path: '/channels', element: <Channels /> },
+      { path: '/varieties', element: <Varieties /> },
       { path: '/privacy', element: <Privacy /> },
       { path: '/terms', element: <Terms /> },
       { path: '*', element: <NotFound /> },

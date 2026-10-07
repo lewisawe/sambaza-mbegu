@@ -1,21 +1,37 @@
 import React, { useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
+import logo from '../../assets/Kimur_logo.svg'
 
 const LINKS = [
+  { to: '/varieties', label: 'Varieties' },
   { to: '/how-it-works', label: 'How it works' },
   { to: '/for-institutions', label: 'For institutions' },
   { to: '/channels', label: 'Channels' },
   { to: '/about', label: 'About' },
 ]
 
+function Brand({ onClick }) {
+  return (
+    <Link
+      to="/"
+      onClick={onClick}
+      aria-label="Kimur"
+      className="flex items-center gap-2 text-carbon-black"
+    >
+      <img src={logo} alt="Kimur" width="36" height="36" className="h-9 w-9" />
+      <span aria-hidden="true" className="font-[var(--font-display)] text-2xl uppercase tracking-tight">
+        Kimur
+      </span>
+    </Link>
+  )
+}
+
 export default function Nav() {
   const [open, setOpen] = useState(false)
   return (
     <nav className="bg-warm-canvas sticky top-0 z-50">
       <div className="max-w-[1200px] mx-auto px-6 py-5 flex items-center justify-between">
-        <Link to="/" className="font-[var(--font-display)] text-2xl uppercase tracking-tight text-carbon-black">
-          Kimur
-        </Link>
+        <Brand />
 
         {/* Desktop links in a brutalist pill */}
         <div className="hidden md:flex items-center gap-1 bg-paper-white rounded-[var(--radius-md)] px-2 py-1">
